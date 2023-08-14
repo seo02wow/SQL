@@ -110,3 +110,52 @@ WHERE O.CUSTID = C.CUSTID
  HAVING MAX(O.SALEPRICE) >= 20000 -- 20000원 이상 책을 1권이라도 구입한 사람
 --HAVING O.SALEPRICE >= 20000  이건 20000원 이상만 구매한 사람 -> 없음
 ;
+--=============================================
+--(실습) 필요시 조인(JOIN)과 GROUP BY ~ HAVING 구문을 사용해서 처리
+--1. 고객이 주문한 도서의 총판매건수, 판매액, 평균값, 최저가, 최고가 구하기
+--2. 고객별로 주문한 도서의 총수량, 총판매액 구하기
+--3. 고객의 이름과 고객이 주문한 도서의 판매가격을 검색
+--4. 고객별로 주문한 모든 도서의 총 판매액을 구하고, 고객명으로 정렬
+--5. 고객별로 주문한 건수, 합계금액, 평균금액을 구하고(3권 보다 적게 구입한 사람 검색)
+--(번외) 고객 중 한 권도 구입 안 한 사람은 누구??
+---------------------------
+--1. 고객이 주문한 도서의 총판매건수, 판매액, 평균값, 최저가, 최고가 구하기
+-- (별치사용시 주의) 빈칸,특수문자 사용시 쌍따옴표("")로 묶어서 표기  , 한글 사용 자제 
+SELECT COUNT(*)AS TOTAL_CNT 
+      ,SUM(SALEPRICE)AS "판매액 합계" -- 한글 사용 가능하나, 사용 지양 
+      ,TRUNC(AVG(SALEPRICE)) 평균값 -- AS 생략 가능
+      ,MIN(SALEPRICE) 최저가_MIN -- 언더바 사용 가능 
+      ,MAX(SALEPRICE) "최고가(MAX)" --특수문자 사용시 쌍따옴표("")로 묶어서 표기 
+  FROM ORDERS
+;
+--2. 고객별로 주문한 도서의 총수량, 총판매액 구하기
+SELECT C.NAME, COUNT(*),SUM(O.SALEPRICE)
+  FROM ORDERS O INNER JOIN CUSTOMER C
+  ON O.CUSTID = C.CUSTID
+GROUP BY C.NAME
+;
+--3. 고객의 이름과 고객이 주문한 도서의 판매가격을 검색
+SELECT C.NAME, O.SALEPRICE, O.ORDERDATE
+  FROM CUSTOMER C INNER JOIN ORDERS O 
+  ON C.CUSTID = O.CUSTID 
+;
+--4. 고객별로 주문한 모든 도서의 총 판매액을 구하고, 고객명으로 정렬
+SELECT C.NAME, SUM(O.SALEPRICE)AS SUM_PRICE
+  FROM CUSTOMER C INNER JOIN ORDERS O 
+  ON C.CUSTID = O.CUSTID 
+GROUP BY C.NAME
+ORDER BY C.NAME
+;
+--5. 고객별로 주문한 건수, 합계금액, 평균금액을 구하고(3권 보다 적게 구입한 사람 검색)
+SELECT C.NAME, COUNT(*)AS CNT, SUM(O.SALEPRICE)AS SUM_PRICE
+      , TRUNC(AVG(O.SALEPRICE)) AS AVG_PRICE
+  FROM CUSTOMER C INNER JOIN ORDERS O 
+    ON C.CUSTID = O.CUSTID 
+GROUP BY C.NAME
+HAVING COUNT(*) < 3
+--ORDER BY SUM(O.SALEPRICE)DESC -- 컬럼명
+--ORDER BY 3 DESC -- 컬럼 위치값
+ORDER BY SUM_PRICE DESC -- 컬럼 별칭 사용 
+;
+
+
