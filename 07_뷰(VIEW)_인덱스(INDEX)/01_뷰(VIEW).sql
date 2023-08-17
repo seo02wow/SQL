@@ -67,7 +67,7 @@ SELECT * FROM VW_ORDERS WHERE PUBLISHER = '굿스포츠';
 --==============================================
 --1. 뷰생성 - 뷰명칭 : VW_ORD_ALL
 ---- 주문(판매)정보, 책정보, 고객정보 모두 조회할 수 있는 형태 뷰 
-SELECT O.*,B.*,C.* 
+SELECT *
 FROM ORDERS O, BOOK B, CUSTOMER C
 WHERE O.BOOKID = B.BOOKID 
   AND O.CUSTID = C.CUSTID 
@@ -78,11 +78,15 @@ AS
 SELECT O.*,
        B.BOOKID AS B_BOOKID,B.PUBLISHER,B.PRICE,B.BOOKNAME,
        C.CUSTID AS C_CUSTID,C.NAME,C.ADDRESS,C.PHONE 
-FROM ORDERS O, BOOK B, CUSTOMER C
-WHERE O.BOOKID = B.BOOKID 
-  AND O.CUSTID = C.CUSTID
-WITH READ ONLY
+  FROM ORDERS O, BOOK B, CUSTOMER C
+ WHERE O.BOOKID = B.BOOKID -- 조인조건
+   AND O.CUSTID = C.CUSTID
+WITH READ ONLY 
 ;
+
+SELECT * FROM VW_ORD_ALL;
+-- 박지성이 구매한 책
+SELECT * FROM VW_ORD_ALL WHERE NAME = '박지성';
 
 --2. 이상미디어에서 출판한 책중 판매된 책제목, 판매금액, 판매일 조회
 SELECT * FROM VW_ORD_ALL;
